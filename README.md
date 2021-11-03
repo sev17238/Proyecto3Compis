@@ -1,5 +1,5 @@
-# Proyecto2Compis
-Proyecto 2 compiladores
+# Proyecto3Compis
+Proyecto 3 compiladores
 
 # References 
 
