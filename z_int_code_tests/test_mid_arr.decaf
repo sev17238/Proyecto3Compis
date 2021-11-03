@@ -1,0 +1,23 @@
+//class Program{
+//    int A[10];
+//
+//    void main(){
+//        int i;
+//        int k;
+//        A[i] = 5;
+//        A[k] = 6;
+//    }
+//}
+
+class Program{
+    int A[5];
+
+    void main(){
+        int localA[5];
+        
+        localA[2] = 10;
+        A[2] = 20;
+
+    }
+}
+

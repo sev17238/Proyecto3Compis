@@ -1,0 +1,21 @@
+
+class Dsevilla{
+
+    void main(){
+        int aa;
+        int bb;
+        char cc[3];
+        boolean boo;
+
+        aa = 1;
+        bb = 3;
+        boo = false;
+
+        struct str {
+            char aa[10];
+            int hey;
+        }
+
+        // cc = aa + bb;
+    }
+}

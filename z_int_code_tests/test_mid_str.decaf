@@ -1,0 +1,14 @@
+class Program{
+
+    struct X{
+        int m;
+        int n;
+    }
+
+	void main(){
+        int x;
+        struct X H;
+        H.m = 3;
+	}
+    
+}

@@ -1,0 +1,30 @@
+class Program{
+	struct A{
+		int a;
+	};
+
+	struct B{
+		int b;
+		int c;
+	};
+
+	int factorial(int n){
+        int z;
+        int w;
+		if (n==0){
+			z = 1;
+		}else{
+            w = factorial(n-1)
+            z = n*w;
+		}
+		return z;
+	}
+
+	void main(){
+		struct B y;
+        int x;
+		y.b = 5;
+        x = factorial(y.b)
+		y.c = x;
+	}
+}

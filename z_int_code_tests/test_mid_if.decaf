@@ -1,0 +1,10 @@
+class Program{
+    void main(){
+        int a;
+        if(a == 1){
+            a = 3;
+        }else{
+            a = 5;
+        }
+    }
+}

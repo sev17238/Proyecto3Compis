@@ -1,0 +1,24 @@
+class Program{
+    int function1(int e,int a){
+        return e + a;
+    }
+
+    int function2(int e){
+        int var1;
+        return e;
+    }
+
+    void main(){
+        int var1;
+        int var2;
+        int var2;
+        boolean var3;
+        
+        char char1[1];
+        char char2[6];
+
+        var1 = 1;
+        
+        var2 = function2();
+    }
+}

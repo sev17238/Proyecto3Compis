@@ -1,0 +1,12 @@
+class Program{
+	int x;
+	void main(){
+		int a;
+		int b;
+		int c;
+		int d;
+
+		c = a + b * d;
+		x = c / 1;
+	}
+}

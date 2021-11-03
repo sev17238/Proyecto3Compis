@@ -1,0 +1,37 @@
+class Program{
+    int mul2(int n,int z){
+        int result;
+        result = n*2+z;
+        return result;
+    }
+
+    void bidk(int n){
+        int wass;
+        wass = 1;
+    }
+
+    void main(){
+        int f;
+        int globalResult;
+        int i;
+        boolean y;
+        int x;
+        boolean j;
+        x = 1;
+        y = true;
+        j = true;
+        if(x==0){
+            f = 0;
+        }else{
+            f = 1;
+        }
+
+        bidk(j);
+
+        while(y&&j){
+            f = mul2(i,10)
+            globalResult = globalResult + f;
+            i = i+1+2*3+4/3;
+        }
+    }
+}

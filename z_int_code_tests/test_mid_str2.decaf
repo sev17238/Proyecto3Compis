@@ -1,0 +1,15 @@
+class Program{
+    struct Y{
+        char z;
+    }
+    struct X{
+        int m;
+        int n;
+        struct Y o;
+    }
+	void main(){
+        int x;
+        struct X H;
+        H.o.z = 'a';
+	}
+}

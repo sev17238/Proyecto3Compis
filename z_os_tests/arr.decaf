@@ -1,0 +1,7 @@
+class Program{
+	void main(){
+		int arr[5];
+
+		arr[2] = 5;
+	}
+}

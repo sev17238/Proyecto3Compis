@@ -1,0 +1,24 @@
+
+class Program{ 
+	int factorial(int n){
+		int w;
+		int ss;
+		if (n==0){
+			ss = 1;
+		}else{
+			w = factorial(n-1)
+			ss = n*w;
+		}
+		return ss;
+	}
+	
+	void main(){
+		int y[10];
+		int a;
+		y[2] = a;
+		y[3] = 3;
+		y[1] = (y[2])+(y[3]);
+		a = factorial(y[1])
+		y[4] = a;
+	}
+}
