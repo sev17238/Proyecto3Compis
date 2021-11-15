@@ -18,8 +18,8 @@ class Inter(DecafVisitor):
     def __init__(self, scopes):
         DecafVisitor.__init__(self)
         self.tree = None
-        self.og_registers = ["t0", "t1","t2", "t3", "t4", "t5", "t6", "t7", "t8","t9","t10","t11", "t12","t13", "t14", "t15", "t16", "t17", "t18", "t19","t20","t21"]
-        #self.og_registers = ["r0", "r1","r2", "r3", "r4", "r5", "r6", "r7", "r8","r9","r10"]
+        #self.og_registers = ["t0", "t1","t2", "t3", "t4", "t5", "t6", "t7", "t8","t9","t10","t11", "t12","t13", "t14", "t15", "t16", "t17", "t18", "t19","t20","t21"]
+        self.og_registers = ["t0", "t1","t2", "t3", "t4", "t5", "t6", "t7", "t8","t9","t10"]
         self.registers = self.og_registers[::-1]
         self.line = ""
         self.label = 0
@@ -84,8 +84,8 @@ class Inter(DecafVisitor):
         true_label = "L" + str(self.label)
         self.label += 1
         while_cont1 = "IfZ " + register + " Goto " + true_label +" \n"
-        #if register in self.og_registers:
-        #    self.registers.append(register)
+        if register in self.og_registers:
+            self.registers.append(register)
         self.line += while_cont1
         self.line += "Goto " + "L_END_WHILE" + "\n"
         self.line += true_label + ":\n"
@@ -104,8 +104,8 @@ class Inter(DecafVisitor):
         salto = "L" + str(self.label)
         self.label += 1
         if_line = "IfZ " + register + " Goto " + salto + "\n"
-        #if register in self.og_registers:
-        #    self.registers.append(register)
+        if register in self.og_registers:
+            self.registers.append(register)
         self.line += if_line
         self.line += "Goto " + "L" + str(self.label) + "\n"
         self.line += salto + ": \n"
@@ -132,10 +132,10 @@ class Inter(DecafVisitor):
         right = self.visit(ctx.right)
         register = self.registers.pop()
         operation = register + " = " + str(left) + " " + ctx.p_arith_op().getText()+ " " + str(right)
-        #if right in self.og_registers:
-        #    self.registers.append(right)
-        #if left in self.og_registers:
-        #    self.registers.append(left)
+        if right in self.og_registers:
+            self.registers.append(right)
+        if left in self.og_registers:
+            self.registers.append(left)
         self.line += operation + "\n"
         return register
 
@@ -144,8 +144,8 @@ class Inter(DecafVisitor):
         sign = 'minus'
         register = self.registers.pop()
         operation = register + " = " + sign + " " + str(expp) 
-        #if expp in self.og_registers:
-        #    self.registers.append(expp)
+        if expp in self.og_registers:
+            self.registers.append(expp)
         self.line += operation + "\n"
         return register
 
@@ -154,10 +154,10 @@ class Inter(DecafVisitor):
         right = self.visit(ctx.right)
         register = self.registers.pop() #se hace pop del registro o temporale en el tope
         operation = register + " = " + str(left) + " " + ctx.arith_op().getText() + " " + str(right)
-        #if right in self.og_registers:
-        #    self.registers.append(right)
-        #if left in self.og_registers:
-        #    self.registers.append(left)
+        if right in self.og_registers:
+            self.registers.append(right)
+        if left in self.og_registers:
+            self.registers.append(left)
         self.line += operation + "\n"
         return register
 
@@ -166,10 +166,10 @@ class Inter(DecafVisitor):
         right = self.visit(ctx.right)
         register = self.registers.pop()
         operation = register + " = " + left +" " + ctx.rel_op().getText()+ " " + right
-        #if right in self.og_registers:
-        #    self.registers.append(right)
-        #if left in self.og_registers:
-        #    self.registers.append(left)
+        if right in self.og_registers:
+            self.registers.append(right)
+        if left in self.og_registers:
+            self.registers.append(left)
         self.line += operation + "\n"
         return register
     
@@ -178,10 +178,10 @@ class Inter(DecafVisitor):
         right = self.visit(ctx.right)
         register = self.registers.pop()
         operation = register + " = " + left + " "+ctx.eq_op().getText()+ " " + right
-        #if right in self.og_registers:
-        #    self.registers.append(right)
-        #if left in self.og_registers:
-        #    self.registers.append(left)
+        if right in self.og_registers:
+            self.registers.append(right)
+        if left in self.og_registers:
+            self.registers.append(left)
         self.line += operation + "\n"
         return register
 
@@ -190,10 +190,10 @@ class Inter(DecafVisitor):
         right = self.visit(ctx.right)
         register = self.registers.pop()
         operation = register + " = " + left +" " +ctx.cond_op().getText()+ " " + right
-        #if right in self.og_registers:
-        #    self.registers.append(right)
-        #if left in self.og_registers:
-        #    self.registers.append(left)
+        if right in self.og_registers:
+            self.registers.append(right)
+        if left in self.og_registers:
+            self.registers.append(left)
         self.line += operation + "\n"
         return register
 
@@ -204,8 +204,8 @@ class Inter(DecafVisitor):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
         equal = str(left) + " = " + str(right) + "\n"
-        #if right in self.og_registers:
-        #    self.registers.append(right)
+        if right in self.og_registers:
+            self.registers.append(right)
         self.line += equal
         return left
     

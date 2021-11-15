@@ -19,9 +19,9 @@ import intermediate
 import sys
 
 
-#program = open('z_int_code_tests/all.decaf', 'r+')
+program = open('z_int_code_tests/test_mid_if.decaf', 'r+')
 #program = open('z_semantic_tests/param.decaf', 'r+')
-program = open('z_os_tests/arr.decaf', 'r+')
+#program = open('z_os_tests/if.decaf', 'r+')
 
 text = program.read()
 program.close()
