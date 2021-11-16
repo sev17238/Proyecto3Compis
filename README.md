@@ -9,5 +9,9 @@ Proyecto 3 compiladores
  - Using ANTLR 4 with Python - http://blog.anvard.org/articles/2016/03/15/antlr-python.html
  - Building a Calculator using a Visitor - https://www.youtube.com/watch?v=YHO_GRwnU90
 
+
+## References
+    - ARMv7 Online Simulator - https://cpulator.01xz.net/?sys=arm
+
 ## UI Ideas
  - https://www.w3schools.com/code/tryit.asp?filename=G68VMFWS12UH
