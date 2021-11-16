@@ -49,6 +49,15 @@ def data(inter):
             arm_code += name.replace(":", "") + " TIMES " + str(int(times)) + " DB 0\n"
     return arm_code
 
+
+def data2(scopes):
+    arm_code = ".section .data\n"
+    for sc in scopes:
+        scope = scopes[sc]
+        arm_code += scope.name[0] + str(scope.id) + " TIMES " + str(int(scope.get_size()/4)) + " DB 0\n"
+    return arm_code
+
+
 def to_arm(inter, scopes):
     # for regis in REGS:
     #     reg = register(regis)
@@ -57,4 +66,9 @@ def to_arm(inter, scopes):
     inter = inter.split("\n")
     num = 15
     # arm_code = data(inter)
-    arm_code = data(scopes)
+    arm_code = data2(scopes)
+    while num > 0:
+        regi = register("R" + str(num))
+        TRUE_REGIS.append(regi)
+        num -= 1
+    arm_code += ".section .text\n.global start\n"
