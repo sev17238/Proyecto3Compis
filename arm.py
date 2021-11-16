@@ -83,3 +83,6 @@ def to_arm(inter, scopes):
         TRUE_REGIS.append(regi)
         num -= 1
     arm_code += ".section .text\n.global start\n"
+    for line in inter:
+        arm_code += read_line(line)
+    print(arm_code)
