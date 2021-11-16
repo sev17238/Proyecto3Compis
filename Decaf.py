@@ -16,10 +16,11 @@ from DecafVisitor import DecafVisitor
 import visitor as Visitor
 import sistema_de_tipos as tables
 import intermediate
+import arm
 import sys
 
 
-program = open('z_int_code_tests/test_mid_if.decaf', 'r+')
+program = open('z_int_code_tests/test_mid_code1.decaf', 'r+')
 #program = open('z_semantic_tests/param.decaf', 'r+')
 #program = open('z_os_tests/if.decaf', 'r+')
 
@@ -52,6 +53,8 @@ if cnt == 0:
     print("_________________________________")
     print("---------------------------------")
     print(inter.line)
+
+    arm.to_arm(inter.line, visitonator.total_scopes)
 else:
     print('Check Your Code! Errors!')
 
