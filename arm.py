@@ -37,6 +37,17 @@ OPERATORS = ["+", "-", "*", "/", "%"]
 
 TRUE_REGIS = []
 
+def read_line(line):
+    arm_code = ""
+    parts = line.split(" ")
+
+    for part in parts:
+        if len(part) > 0:
+            if part == "main:":
+                arm_code += "_start:\n"
+
+    return arm_code
+
 
 def data(inter):
     arm_code = ".section .data\n"
