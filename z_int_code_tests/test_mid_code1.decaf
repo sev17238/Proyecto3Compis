@@ -6,7 +6,11 @@ class Program{
 		int c;
 		int d;
 
-		c = a + b * d;
-		x = c / 1;
+		a = 1;
+		b = 2;
+		
+		c = a + b 
+		// * d;
+		//x = c / 1;
 	}
 }

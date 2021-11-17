@@ -37,6 +37,7 @@ OPERATORS = ["+", "-", "*", "/", "%"]
 
 TRUE_REGIS = []
 
+
 def read_line(line):
     arm_code = ""
     parts = line.split(" ")
@@ -45,6 +46,43 @@ def read_line(line):
         if len(part) > 0:
             if part == "main:":
                 arm_code += "_start:\n"
+            if part[-1] == ":":
+                arm_code += part +"\n"
+
+            if part == "+":
+                regi1 = REGISTERS.pop()
+                regi2 = REGISTERS.pop()
+                arm_code += "mov " + regi1 + " " +  parts[parts.index(part)-1] + "\n"
+                arm_code += "mov " + regi2 + " " +  parts[parts.index(part)+1] + "\n"
+                arm_code += "add " + regi1 + " " + regi2 + "\n"
+                REGISTERS.append(regi2)
+            
+            if part == "-":
+                regi1 = REGISTERS.pop()
+                regi2 = REGISTERS.pop()
+                arm_code += "mov " + regi1 + " " +  parts[parts.index(part)-1] + "\n"
+                arm_code += "mov " + regi2 + " " +  parts[parts.index(part)+1] + "\n"
+                arm_code += "sub " + regi1 + " " + regi2 + "\n"
+                REGISTERS.append(regi2)
+
+            if part == "*":
+                regi1 = REGISTERS.pop()
+                regi2 = REGISTERS.pop()
+                arm_code += "mov " + regi1 + " " +  parts[parts.index(part)-1] + "\n"
+                arm_code += "mov " + regi2 + " " +  parts[parts.index(part)+1] + "\n"
+                arm_code += "sub " + regi1 + " " + regi2 + "\n"
+                REGISTERS.append(regi2)
+
+            if part == "=":
+                arm_code += "mov " + parts[parts.index(part)-1] + " " + parts[parts.index(part) + 1] + "\n"
+            
+            if part == "Goto":
+                arm_code += "je " + parts[parts.index(part)+ 1]
+ 
+    if parts[0] == "func":
+        if "end" in parts[1]:
+            arm_code += "ret\n"
+        # arm_code += "PUBLIC _" +parts[1] + "\n"
 
     return arm_code
 
