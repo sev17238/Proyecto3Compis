@@ -1,0 +1,53 @@
+main: 
+func begin 12
+m1[0] = 1
+m1[4] = 2
+t0 = m1[0] + m1[4]
+m1[8] = t0
+func end 
+
+
+sub sp, sp, #12     @se comienza la funcion alocando espacio
+mov r0, #1          @1 a r0
+str r0, [sp, #8]    @almacenar 1 contenido en r0 en pila en direccion de memoria 8
+mov r0, #2          @2 a r0
+str r0, [sp, #4]    @almacenar 2 contenido en r0 en pila en direccion de memoria 4
+ldr r0, [sp, #8]    @cargar lo que esta en la direccion de memoria 8 osea 1
+ldr r1, [sp, #4]    @cargar lo que esta en la direccion de memoria 4 osea 2
+add r0, r0, r1      @sumar valores en registros
+str r0, [sp]        @almacenar el valor de r0 en el puntero 
+mov r0, #0          @limpiar el registro
+add sp, sp, #12     @se termina la funcion regresando el espacio
+bx lr
+
+
+
+ARM PRIMERA FORMA:
+main:
+  sub sp, sp, #12
+  mov r0, #1
+  str r0, [sp, #8]
+  mov r0, #2
+  str r0, [sp, #4]
+  ldr r0, [sp, #8]
+  ldr r1, [sp, #4]
+  add r0, r0, r1
+  str r0, [sp]
+  mov r0, #0
+  add sp, sp, #12
+  bx lr
+
+ARM SEGUNDA FORMA (#0):
+main:
+  sub sp, sp, #12
+  mov r0, #1
+  str r0, [sp, #0]
+  mov r0, #2
+  str r0, [sp, #4]
+  ldr r0, [sp, #0]
+  ldr r1, [sp, #4]
+  add r0, r0, r1
+  str r0, [sp]
+  mov r0, #8
+  add sp, sp, #12
+  bx lr

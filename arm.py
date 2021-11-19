@@ -7,6 +7,8 @@
 # Traduccion de codigo intermedio a arm
 ###################################
 
+import re
+
 # $0x80 finalizar 
 # Retorno en EAX
 
@@ -44,8 +46,12 @@ def read_line(line):
 
     for part in parts:
         if len(part) > 0:
-            if part == "main:":
-                arm_code += "_start:\n"
+            #if part == "main:":
+            #    arm_code += "_start:\n"
+            if parts[0] == "func" and parts[1] == 'begin':
+                memory_pos = re.findall('[0-9]+', parts[2])
+                arm_code += "sub sp, sp, #"+str(memory_pos[0])+"\n"
+                break
             if part[-1] == ":":
                 arm_code += part +"\n"
 
@@ -74,14 +80,32 @@ def read_line(line):
                 REGISTERS.append(regi2)
 
             if part == "=":
-                arm_code += "mov " + parts[parts.index(part)-1] + " " + parts[parts.index(part) + 1] + "\n"
+                reg1 = REGISTERS.pop()
+                #arm_code += "mov " + parts[parts.index(part)-1] + " " + parts[parts.index(part) + 1] + "\n"
+                right_side = str(parts[parts.index(part) + 1])
+
+                left_side = parts[parts.index(part)-1]
+                len_str = len(left_side)
+                try:
+                    b_index = left_side.index('[')
+                except:
+                    b_index = 0
+                pos_brackets = len_str - b_index
+                brackets_content = left_side[-pos_brackets:]
+
+                memory_address = str(re.findall('[0-9]+', brackets_content)[0])
+
+                arm_code += "mov " + reg1 + ", #" + right_side + "\n"
+                arm_code += "str " + reg1 + ", [sp, #" + memory_address + "]\n"
+                REGISTERS.append(reg1)
+
             
             if part == "Goto":
                 arm_code += "je " + parts[parts.index(part)+ 1]
  
     if parts[0] == "func":
         if "end" in parts[1]:
-            arm_code += "ret\n"
+            arm_code += "bx lr\n"
         # arm_code += "PUBLIC _" +parts[1] + "\n"
 
     return arm_code
@@ -103,8 +127,9 @@ def data2(scopes):
     arm_code = ".section .data\n"
     for sc in scopes:
         scope = scopes[sc]
-        arm_code += scope.name[0] + str(scope.id) + " TIMES " + str(int(scope.get_size()/4)) + " DB 0\n"
+        #arm_code += scope.name[0] + str(scope.id) + " TIMES " + str(int(scope.get_size()/4)) + " DB 0\n"
     return arm_code
+
 
 
 def to_arm(inter, scopes):
@@ -120,7 +145,7 @@ def to_arm(inter, scopes):
         regi = register("R" + str(num))
         TRUE_REGIS.append(regi)
         num -= 1
-    arm_code += ".section .text\n.global start\n"
+    arm_code += ".section .text\n.global main\n"
     for line in inter:
         arm_code += read_line(line)
     print(arm_code)
