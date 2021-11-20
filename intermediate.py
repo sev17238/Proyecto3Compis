@@ -36,12 +36,12 @@ class Inter(DecafVisitor):
         name = ctx.ID().getText()
         self.scope_ids +=1
         self.scope_actual.append(name)
-        start = name +": \n"
+        start = name +":\n"
         actual = self.scopes[self.scope_actual[-1]]
         start += "func begin " + str(actual.get_size())  + "\n"
         self.line += start
         self.visitChildren(ctx)
-        end = "func end \n"
+        end = "func end\n"
         self.line += end
         self.scope_actual.pop()
         return 0

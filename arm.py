@@ -40,51 +40,39 @@ OPERATORS = ["+", "-", "*", "/", "%"]
 TRUE_REGIS = []
 
 
-def read_line(line):
-    arm_code = ""
-    parts = line.split(" ")
+def read_lines(inter):   
+    arm_code_all = ""
+    function_alocated_space = 0
+    for line in inter:
+        arm_code = ""
+        parts = line.split(" ")
 
-    for part in parts:
-        if len(part) > 0:
-            #if part == "main:":
-            #    arm_code += "_start:\n"
+        # para funciones, etiquetas
+        if len(parts) == 1:
+            arm_code += parts[0] +"\n"
+        if len(parts) == 2:
+            # func end
+            if parts[0] == "func" and parts[1] == "end":
+                arm_code += "add sp, sp, #" + str(function_alocated_space)+'\n'
+                function_alocated_space = 0
+                arm_code += "bx lr\n"
+            # Goto L#
+            if parts[0] == "Goto":
+                arm_code += "je " + parts[1]
+        if len(parts) == 3:
+            # func begin #
             if parts[0] == "func" and parts[1] == 'begin':
                 memory_pos = re.findall('[0-9]+', parts[2])
-                arm_code += "sub sp, sp, #"+str(memory_pos[0])+"\n"
-                break
-            if part[-1] == ":":
-                arm_code += part +"\n"
+                memory_pos = parts[2]
+                function_alocated_space = memory_pos
+                arm_code += "sub sp, sp, #"+memory_pos+"\n"
 
-            if part == "+":
-                regi1 = REGISTERS.pop()
-                regi2 = REGISTERS.pop()
-                arm_code += "mov " + regi1 + " " +  parts[parts.index(part)-1] + "\n"
-                arm_code += "mov " + regi2 + " " +  parts[parts.index(part)+1] + "\n"
-                arm_code += "add " + regi1 + " " + regi2 + "\n"
-                REGISTERS.append(regi2)
-            
-            if part == "-":
-                regi1 = REGISTERS.pop()
-                regi2 = REGISTERS.pop()
-                arm_code += "mov " + regi1 + " " +  parts[parts.index(part)-1] + "\n"
-                arm_code += "mov " + regi2 + " " +  parts[parts.index(part)+1] + "\n"
-                arm_code += "sub " + regi1 + " " + regi2 + "\n"
-                REGISTERS.append(regi2)
-
-            if part == "*":
-                regi1 = REGISTERS.pop()
-                regi2 = REGISTERS.pop()
-                arm_code += "mov " + regi1 + " " +  parts[parts.index(part)-1] + "\n"
-                arm_code += "mov " + regi2 + " " +  parts[parts.index(part)+1] + "\n"
-                arm_code += "sub " + regi1 + " " + regi2 + "\n"
-                REGISTERS.append(regi2)
-
-            if part == "=":
+            # m#[#] = literal
+            if parts[0] != "func" and parts[2].isnumeric():
                 reg1 = REGISTERS.pop()
-                #arm_code += "mov " + parts[parts.index(part)-1] + " " + parts[parts.index(part) + 1] + "\n"
-                right_side = str(parts[parts.index(part) + 1])
+                right_side = str(2)
 
-                left_side = parts[parts.index(part)-1]
+                left_side = parts[0]
                 len_str = len(left_side)
                 try:
                     b_index = left_side.index('[')
@@ -98,17 +86,52 @@ def read_line(line):
                 arm_code += "mov " + reg1 + ", #" + right_side + "\n"
                 arm_code += "str " + reg1 + ", [sp, #" + memory_address + "]\n"
                 REGISTERS.append(reg1)
-
+            # m#[#] = m#[#]
+            else:
+                pass
+            # push param m#[#]
+            if parts[0] == 'push':
+                pass
             
-            if part == "Goto":
-                arm_code += "je " + parts[parts.index(part)+ 1]
- 
-    if parts[0] == "func":
-        if "end" in parts[1]:
-            arm_code += "bx lr\n"
-        # arm_code += "PUBLIC _" +parts[1] + "\n"
+        if len(parts) == 4:
+            # para llamada a metodos
+            if parts[2] == '_MCall':
+                pass
 
-    return arm_code
+        if len(parts) == 5:
+            if parts[3] == "+":
+                regi1 = REGISTERS.pop()
+                regi2 = REGISTERS.pop()
+                arm_code += "mov " + regi1 + " " +  parts[2] + "\n"
+                arm_code += "mov " + regi2 + " " +  parts[4] + "\n"
+                arm_code += "add " + regi1 + " " + regi2 + "\n"
+                REGISTERS.append(regi2)
+            
+            if parts[3] == "-":
+                regi1 = REGISTERS.pop()
+                regi2 = REGISTERS.pop()
+                arm_code += "mov " + regi1 + " " +  parts[2] + "\n"
+                arm_code += "mov " + regi2 + " " +  parts[4] + "\n"
+                arm_code += "sub " + regi1 + " " + regi2 + "\n"
+                REGISTERS.append(regi2)
+
+            if parts[3] == "*":
+                regi1 = REGISTERS.pop()
+                regi2 = REGISTERS.pop()
+                arm_code += "mov " + regi1 + " " +  parts[2] + "\n"
+                arm_code += "mov " + regi2 + " " +  parts[4] + "\n"
+                arm_code += "sub " + regi1 + " " + regi2 + "\n"
+                REGISTERS.append(regi2)
+
+            if parts[3] == "<":
+                pass
+
+            if parts[3] == ">":
+                pass
+
+        arm_code_all += arm_code
+
+    return arm_code_all
 
 
 def data(inter):
@@ -146,6 +169,5 @@ def to_arm(inter, scopes):
         TRUE_REGIS.append(regi)
         num -= 1
     arm_code += ".section .text\n.global main\n"
-    for line in inter:
-        arm_code += read_line(line)
+    arm_code += read_lines(inter)
     print(arm_code)
