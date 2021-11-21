@@ -37,6 +37,8 @@ REGISTERS = ["R15", "R14", "R13", "R12", "R11", "R10", "R9", "R8", "R7", "R6", "
 
 OPERATORS = ["+", "-", "*", "/", "%"]
 
+TRUE_REGIS = []
+
 MEMORY_FUNCTION_CONV = {
     0:  -4  ,
     4:  -8  ,
@@ -56,13 +58,9 @@ MEMORY_FUNCTION_CONV = {
     60: -64 ,
 }
 
-TRUE_REGIS = []
-
-ALL_ARM_CODE_LINES = []
-
-def getMemoryAddInFunction(allocated_memory,inter_memory):
-    memory_address_to_use = allocated_memory + MEMORY_FUNCTION_CONV[inter_memory]
-    return memory_address_to_use
+def getMemoryAddressInsideFunction(allocated_memory,inter_memory):
+    memory_address_to_use = int(allocated_memory) - (int(inter_memory)+4)
+    return str(memory_address_to_use)
 
 def getBracketsContent(abstract_inter_var):
     len_str = len(abstract_inter_var)
