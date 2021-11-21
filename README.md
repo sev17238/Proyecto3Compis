@@ -17,7 +17,7 @@ Proyecto 3 compiladores
     - ASSEMBLY PARTE 1 - https://azeria-labs.com/writing-arm-assembly-part-1/
     - CHEATSHEET - https://azeria-labs.com/assembly-basics-cheatsheet/
 
-    - LEANR MASM ASSEMBLY - https://www.tutorialspoint.com/assembly_programming/index.htm
+    - LEARN MASM ASSEMBLY - https://www.tutorialspoint.com/assembly_programming/index.htm
 
 ## UI Ideas
  - https://www.w3schools.com/code/tryit.asp?filename=G68VMFWS12UH

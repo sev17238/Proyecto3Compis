@@ -37,12 +37,50 @@ REGISTERS = ["R15", "R14", "R13", "R12", "R11", "R10", "R9", "R8", "R7", "R6", "
 
 OPERATORS = ["+", "-", "*", "/", "%"]
 
+MEMORY_FUNCTION_CONV = {
+    0:  -4  ,
+    4:  -8  ,
+    8:  -12 ,
+    12: -16 ,
+    16: -20 ,
+    20: -24 ,
+    24: -28 ,
+    28: -32 ,
+    32: -36 ,
+    36: -40 ,
+    40: -44 ,
+    44: -48 ,
+    48: -52 ,
+    52: -56 ,
+    56: -60 ,
+    60: -64 ,
+}
+
 TRUE_REGIS = []
 
+ALL_ARM_CODE_LINES = []
+
+def getMemoryAddInFunction(allocated_memory,inter_memory):
+    memory_address_to_use = allocated_memory + MEMORY_FUNCTION_CONV[inter_memory]
+    return memory_address_to_use
+
+def getBracketsContent(abstract_inter_var):
+    len_str = len(abstract_inter_var)
+    try:
+        b_index = abstract_inter_var.index('[')
+    except:
+        return False
+    pos_brackets = len_str - b_index
+    brackets_content = abstract_inter_var[-pos_brackets:]
+    memory_address = str(re.findall('[0-9]+', brackets_content)[0])
+    return memory_address
 
 def read_lines(inter):   
+    armc = []
     arm_code_all = ""
     function_alocated_space = 0
+    actual_temp = 0
+    line_cnt = 0
     for line in inter:
         arm_code = ""
         parts = line.split(" ")
@@ -50,86 +88,114 @@ def read_lines(inter):
         # para funciones, etiquetas
         if len(parts) == 1:
             arm_code += parts[0] +"\n"
-        if len(parts) == 2:
+        elif len(parts) == 2:
             # func end
             if parts[0] == "func" and parts[1] == "end":
-                arm_code += "add sp, sp, #" + str(function_alocated_space)+'\n'
+                arm_code += "\tadd sp, sp, #" + str(function_alocated_space)+'\n'
                 function_alocated_space = 0
-                arm_code += "bx lr\n"
+                arm_code += "\tbx lr\n"
             # Goto L#
             if parts[0] == "Goto":
-                arm_code += "je " + parts[1]
-        if len(parts) == 3:
+                arm_code += "\tje " + parts[1]
+        elif len(parts) == 3:
             # func begin #
             if parts[0] == "func" and parts[1] == 'begin':
                 memory_pos = re.findall('[0-9]+', parts[2])
                 memory_pos = parts[2]
                 function_alocated_space = memory_pos
-                arm_code += "sub sp, sp, #"+memory_pos+"\n"
+                arm_code += "\tsub sp, sp, #"+memory_pos+"\n"
 
             # m#[#] = literal
-            if parts[0] != "func" and parts[2].isnumeric():
+            elif parts[0] != "func" and parts[2].isnumeric():
                 reg1 = REGISTERS.pop()
-                right_side = str(2)
+                right_side = parts[2]
 
                 left_side = parts[0]
-                len_str = len(left_side)
-                try:
-                    b_index = left_side.index('[')
-                except:
-                    b_index = 0
-                pos_brackets = len_str - b_index
-                brackets_content = left_side[-pos_brackets:]
+                memory_address = getBracketsContent(left_side)
 
-                memory_address = str(re.findall('[0-9]+', brackets_content)[0])
-
-                arm_code += "mov " + reg1 + ", #" + right_side + "\n"
-                arm_code += "str " + reg1 + ", [sp, #" + memory_address + "]\n"
+                arm_code += "\tmov " + reg1 + ", #" + right_side + "\n"
+                arm_code += "\tstr " + reg1 + ", [sp, #" + memory_address + "]\n"
                 REGISTERS.append(reg1)
+            # m#[#] = t#
+            elif parts[0] != "func" and re.search("^t.*[0-9]$", parts[2]): #check if hast pattern for t0 - t9
+                # !this is handled in if len(parts) == 5:
+                continue
+            
+            # push param m#[#]
+            elif parts[0] == 'push':
+                continue
+
             # m#[#] = m#[#]
             else:
-                pass
-            # push param m#[#]
-            if parts[0] == 'push':
-                pass
+                continue
             
-        if len(parts) == 4:
+        elif len(parts) == 4:
             # para llamada a metodos
             if parts[2] == '_MCall':
-                pass
+                continue
 
-        if len(parts) == 5:
+        elif len(parts) == 5:
             if parts[3] == "+":
+                left_side = parts[0]
+                first_operand = parts[2]
+                second_operand = parts[4]
+
+
+                if first_operand.isnumeric(): 
+                    memory_address = first_operand
+                else:
+                    memory_address = getBracketsContent(first_operand)
+
+                if second_operand.isnumeric(): 
+                    memory_address2 = second_operand
+                else:
+                    memory_address2 = getBracketsContent(second_operand)
+
                 regi1 = REGISTERS.pop()
                 regi2 = REGISTERS.pop()
-                arm_code += "mov " + regi1 + " " +  parts[2] + "\n"
-                arm_code += "mov " + regi2 + " " +  parts[4] + "\n"
-                arm_code += "add " + regi1 + " " + regi2 + "\n"
+                arm_code += "\tldr " + regi1 + ", [sp, #" + memory_address + "]\n"
+                arm_code += "\tldr " + regi2 + ", [sp, #" + memory_address2 + "]\n"
+
+                arm_code += "\tadd " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
+                
+                #!handle temporals like m#[#] = t#
+                if memory_address > memory_address2:
+                    arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address) + 4) + "]\n"
+                else:
+                    arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address2) + 4) + "]\n"
+
+                #?if last function
+                    #arm_code += "\tmov " + regi1 + " " +  str(function_alocated_space-4) + "\n"
+
                 REGISTERS.append(regi2)
+                REGISTERS.append(regi1)
             
-            if parts[3] == "-":
+            elif parts[3] == "-":
                 regi1 = REGISTERS.pop()
                 regi2 = REGISTERS.pop()
-                arm_code += "mov " + regi1 + " " +  parts[2] + "\n"
-                arm_code += "mov " + regi2 + " " +  parts[4] + "\n"
-                arm_code += "sub " + regi1 + " " + regi2 + "\n"
+                arm_code += "\tmov " + regi1 + " " +  parts[2] + "\n"
+                arm_code += "\tmov " + regi2 + " " +  parts[4] + "\n"
+                arm_code += "\tsub " + regi1 + " " + regi2 + "\n"
                 REGISTERS.append(regi2)
 
-            if parts[3] == "*":
+            elif parts[3] == "*":
                 regi1 = REGISTERS.pop()
                 regi2 = REGISTERS.pop()
-                arm_code += "mov " + regi1 + " " +  parts[2] + "\n"
-                arm_code += "mov " + regi2 + " " +  parts[4] + "\n"
-                arm_code += "sub " + regi1 + " " + regi2 + "\n"
+                arm_code += "\tmov " + regi1 + " " +  parts[2] + "\n"
+                arm_code += "\tmov " + regi2 + " " +  parts[4] + "\n"
+                arm_code += "\tsub " + regi1 + " " + regi2 + "\n"
                 REGISTERS.append(regi2)
 
-            if parts[3] == "<":
-                pass
+            elif parts[3] == "<":
+                continue
 
-            if parts[3] == ">":
-                pass
+            elif parts[3] == ">":
+                continue
 
         arm_code_all += arm_code
+        line_cnt += 1
+        armct = arm_code.replace("\t","")
+        armc.append(armct.split("\n")[0])
 
     return arm_code_all
 
@@ -152,6 +218,27 @@ def data2(scopes):
         scope = scopes[sc]
         #arm_code += scope.name[0] + str(scope.id) + " TIMES " + str(int(scope.get_size()/4)) + " DB 0\n"
     return arm_code
+
+def getReg(inter_expression):
+    x = inter_expression[0]
+    y = inter_expression[2]
+    z = inter_expression[3]
+    registers_to_use = []
+    for i in REGISTERS:
+        if x in REGISTERS[i]:
+            pass
+        else:
+            registers_to_use.append(x)
+        if y in REGISTERS[i]:
+            pass
+        else:
+            registers_to_use.append(y)
+        if z in REGISTERS[i]:
+            pass
+        else:
+            registers_to_use.append(z)
+    
+    return registers_to_use
 
 
 
