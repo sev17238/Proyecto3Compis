@@ -58,6 +58,42 @@ MEMORY_FUNCTION_CONV = {
     60: -64 ,
 }
 
+def operationsFunction(first_operand,second_operand,arm_code,operation):
+
+    
+    if first_operand.isnumeric(): 
+        memory_address = first_operand
+    else:
+        memory_address = getBracketsContent(first_operand)
+
+    if second_operand.isnumeric(): 
+        memory_address2 = second_operand
+    else:
+        memory_address2 = getBracketsContent(second_operand)
+
+    regi1 = REGISTERS.pop()
+    regi2 = REGISTERS.pop()
+    arm_code += "\tldr " + regi1 + ", [sp, #" + memory_address + "]\n"
+    arm_code += "\tldr " + regi2 + ", [sp, #" + memory_address2 + "]\n"
+
+    if operation == 'add': arm_code += "\tadd " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
+    elif operation == 'sub': arm_code += "\tsub " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
+    elif operation == 'mul': arm_code += "\tmul " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
+
+    #!handle temporals like m#[#] = t#
+    if memory_address > memory_address2:
+        arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address) + 4) + "]\n"
+    else:
+        arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address2) + 4) + "]\n"
+
+    #?if last function
+        #arm_code += "\tmov " + regi1 + " " +  str(function_alocated_space-4) + "\n"
+
+    REGISTERS.append(regi2)
+    REGISTERS.append(regi1)
+
+    return arm_code
+
 def getMemoryAddressInsideFunction(allocated_memory,inter_memory):
     memory_address_to_use = int(allocated_memory) - (int(inter_memory)+4)
     return str(memory_address_to_use)
@@ -134,12 +170,12 @@ def read_lines(inter):
 
         elif len(parts) == 5:
             if parts[3] == "+":
-                left_side = parts[0]
+                #left_side = parts[0]
                 first_operand = parts[2]
                 second_operand = parts[4]
 
 
-                if first_operand.isnumeric(): 
+                '''if first_operand.isnumeric(): 
                     memory_address = first_operand
                 else:
                     memory_address = getBracketsContent(first_operand)
@@ -166,23 +202,21 @@ def read_lines(inter):
                     #arm_code += "\tmov " + regi1 + " " +  str(function_alocated_space-4) + "\n"
 
                 REGISTERS.append(regi2)
-                REGISTERS.append(regi1)
+                REGISTERS.append(regi1)'''
+
+                arm_code += operationsFunction(first_operand,second_operand,arm_code,'add')
             
             elif parts[3] == "-":
-                regi1 = REGISTERS.pop()
-                regi2 = REGISTERS.pop()
-                arm_code += "\tmov " + regi1 + " " +  parts[2] + "\n"
-                arm_code += "\tmov " + regi2 + " " +  parts[4] + "\n"
-                arm_code += "\tsub " + regi1 + " " + regi2 + "\n"
-                REGISTERS.append(regi2)
+                first_operand = parts[2]
+                second_operand = parts[4]
+
+                arm_code += operationsFunction(first_operand,second_operand,arm_code,'sub')
 
             elif parts[3] == "*":
-                regi1 = REGISTERS.pop()
-                regi2 = REGISTERS.pop()
-                arm_code += "\tmov " + regi1 + " " +  parts[2] + "\n"
-                arm_code += "\tmov " + regi2 + " " +  parts[4] + "\n"
-                arm_code += "\tsub " + regi1 + " " + regi2 + "\n"
-                REGISTERS.append(regi2)
+                first_operand = parts[2]
+                second_operand = parts[4]
+
+                arm_code += operationsFunction(first_operand,second_operand,arm_code,'mul')
 
             elif parts[3] == "<":
                 continue
