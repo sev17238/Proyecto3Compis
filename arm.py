@@ -58,23 +58,43 @@ MEMORY_FUNCTION_CONV = {
     60: -64 ,
 }
 
-def operationsFunction(first_operand,second_operand,arm_code,operation):
 
-    
+
+def operationsFunction(first_operand,second_operand,operation,last_linee):
+    arm_code = ''
+    last_line = last_linee.split(' ')
     if first_operand.isnumeric(): 
         memory_address = first_operand
+    elif re.search("^t.*[0-9]$", first_operand): #check if has pattern for t0 - t9:
+        first_ = last_line[2]
+        second_ = last_line[4]
+        memory_address1 = getBracketsContent(first_)
+        memory_address2 = getBracketsContent(second_)
+        if memory_address1 > memory_address2:
+            memory_address = memory_address1 + 4
+        else:
+            memory_address = memory_address2 + 4
     else:
         memory_address = getBracketsContent(first_operand)
 
     if second_operand.isnumeric(): 
         memory_address2 = second_operand
+    elif re.search("^t.*[0-9]$", second_operand): #check if has pattern for t0 - t9:
+        first_ = last_line[2]
+        second_ = last_line[4]
+        memory_address1 = getBracketsContent(first_)
+        memory_address2 = getBracketsContent(second_)
+        if memory_address1 > memory_address2:
+            memory_address2 = memory_address1 + 4
+        else:
+            memory_address2 = memory_address2 + 4
     else:
         memory_address2 = getBracketsContent(second_operand)
 
     regi1 = REGISTERS.pop()
     regi2 = REGISTERS.pop()
-    arm_code += "\tldr " + regi1 + ", [sp, #" + memory_address + "]\n"
-    arm_code += "\tldr " + regi2 + ", [sp, #" + memory_address2 + "]\n"
+    arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
+    arm_code += "\tldr " + regi2 + ", [sp, #" + str(memory_address2) + "]\n"
 
     if operation == 'add': arm_code += "\tadd " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
     elif operation == 'sub': arm_code += "\tsub " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
@@ -107,7 +127,7 @@ def getBracketsContent(abstract_inter_var):
     pos_brackets = len_str - b_index
     brackets_content = abstract_inter_var[-pos_brackets:]
     memory_address = str(re.findall('[0-9]+', brackets_content)[0])
-    return memory_address
+    return int(memory_address)
 
 def read_lines(inter):   
     armc = []
@@ -204,19 +224,22 @@ def read_lines(inter):
                 REGISTERS.append(regi2)
                 REGISTERS.append(regi1)'''
 
-                arm_code += operationsFunction(first_operand,second_operand,arm_code,'add')
+                last_line = inter[line_cnt-1]
+                arm_code += operationsFunction(first_operand,second_operand,'add',last_line)
             
             elif parts[3] == "-":
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-                arm_code += operationsFunction(first_operand,second_operand,arm_code,'sub')
+                last_line = inter[line_cnt-1]
+                arm_code += operationsFunction(first_operand,second_operand,'sub',last_line)
 
             elif parts[3] == "*":
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-                arm_code += operationsFunction(first_operand,second_operand,arm_code,'mul')
+                last_line = inter[line_cnt-1]
+                arm_code += operationsFunction(first_operand,second_operand,'mul',last_line)
 
             elif parts[3] == "<":
                 continue
