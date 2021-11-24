@@ -108,7 +108,7 @@ class Inter(DecafVisitor):
             self.registers.append(register)
         self.line += if_line
         self.line += "Goto " + "L" + str(self.label) + "\n"
-        self.line += salto + ": \n"
+        self.line += salto + ":\n"
         self.visit(ctx.block1)
         end = ""
         if ctx.block2:
@@ -120,7 +120,7 @@ class Inter(DecafVisitor):
             self.visit(ctx.block2)
             self.label += 1
         else:
-            end_line = "L" + str(self.label) + ": \n"
+            end_line = "L" + str(self.label) + ":\n"
             self.line += end_line
         if len(end) > 0:
             self.line += end + "\n"

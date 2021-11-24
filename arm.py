@@ -58,16 +58,58 @@ MEMORY_FUNCTION_CONV = {
     60: -64 ,
 }
 
+def comparisonsFunction(first_operand,second_operand,operation,inter,i):
+    last_line = inter[i-1].split(' ')
+    next_line = inter[i+1].split(' ')
+    next_next_line = inter[i+2].split(' ')
+
+    arm_code = ''
+    first_ = last_line[2]
+
+    if first_operand.isnumeric(): 
+        memory_address = first_operand
+    elif re.search("^t.*[0-9]$", first_operand): #check if has pattern for t0 - t9:
+        memory_address1 = getBracketsContent(first_)
+        memory_address = memory_address1 + 4
+    else:
+        memory_address = getBracketsContent(first_operand)
+
+    if second_operand.isnumeric(): 
+        memory_address2 = second_operand
+    elif re.search("^t.*[0-9]$", second_operand): #check if has pattern for t0 - t9:
+        memory_address1 = getBracketsContent(first_)
+        memory_address2 = memory_address1 + 4
+    else:
+        memory_address2 = getBracketsContent(second_operand)
+
+    regi1 = REGISTERS.pop()
+
+    arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
+    arm_code += "\tcmp " + regi1 + ", [sp, #" + str(memory_address2) + "]\n"
+
+    # actual_line [t0,=,m1[0],==,5]
+    # next_line [IfZ,t0,Goto,L0]
+    if  operation == '==': arm_code += "\tbne .LBB0_" + next_line[3][1] + "\n"
+    elif operation == '>': arm_code += "\tblt .LBB0_" + next_line[3][1] + "\n"
+    elif operation == '<': arm_code += "\tbgt .LBB0_" + next_line[3][1] + "\n"
+
+    # next_next_line ["Goto", "L1"]
+    arm_code += "\tb .LBB0_" + next_next_line[1][1]+ "\n"
+
+    REGISTERS.append(regi1)
+
+    return arm_code
 
 
 def operationsFunction(first_operand,second_operand,operation,last_linee):
     arm_code = ''
     last_line = last_linee.split(' ')
+    first_ = last_line[2]
+    second_ = last_line[4]
+
     if first_operand.isnumeric(): 
         memory_address = first_operand
     elif re.search("^t.*[0-9]$", first_operand): #check if has pattern for t0 - t9:
-        first_ = last_line[2]
-        second_ = last_line[4]
         memory_address1 = getBracketsContent(first_)
         memory_address2 = getBracketsContent(second_)
         if memory_address1 > memory_address2:
@@ -80,8 +122,6 @@ def operationsFunction(first_operand,second_operand,operation,last_linee):
     if second_operand.isnumeric(): 
         memory_address2 = second_operand
     elif re.search("^t.*[0-9]$", second_operand): #check if has pattern for t0 - t9:
-        first_ = last_line[2]
-        second_ = last_line[4]
         memory_address1 = getBracketsContent(first_)
         memory_address2 = getBracketsContent(second_)
         if memory_address1 > memory_address2:
@@ -134,14 +174,20 @@ def read_lines(inter):
     arm_code_all = ""
     function_alocated_space = 0
     actual_temp = 0
-    line_cnt = 0
-    for line in inter:
+
+    #for i in len(0,inter):
+    i = 0
+    while(i < len(inter)):
+        line = inter[i]
         arm_code = ""
         parts = line.split(" ")
 
-        # para funciones, etiquetas
+        # para funciones, etiquetas, etc
         if len(parts) == 1:
-            arm_code += parts[0] +"\n"
+            if re.search("^L.*[0-9]:$", parts[0]): #se verifica partron L#:
+                arm_code += ".LBB0_" + parts[0][1] + "\n"
+            else:
+                arm_code += parts[0] + '\n'
         elif len(parts) == 2:
             # func end
             if parts[0] == "func" and parts[1] == "end":
@@ -150,7 +196,7 @@ def read_lines(inter):
                 arm_code += "\tbx lr\n"
             # Goto L#
             if parts[0] == "Goto":
-                arm_code += "\tje " + parts[1]
+               continue
         elif len(parts) == 3:
             # func begin #
             if parts[0] == "func" and parts[1] == 'begin':
@@ -167,8 +213,8 @@ def read_lines(inter):
                 left_side = parts[0]
                 memory_address = getBracketsContent(left_side)
 
-                arm_code += "\tmov " + reg1 + ", #" + right_side + "\n"
-                arm_code += "\tstr " + reg1 + ", [sp, #" + memory_address + "]\n"
+                arm_code += "\tmov " + reg1 + ", #" + str(right_side) + "\n"
+                arm_code += "\tstr " + reg1 + ", [sp, #" + str(memory_address) + "]\n"
                 REGISTERS.append(reg1)
             # m#[#] = t#
             elif parts[0] != "func" and re.search("^t.*[0-9]$", parts[2]): #check if hast pattern for t0 - t9
@@ -189,68 +235,50 @@ def read_lines(inter):
                 continue
 
         elif len(parts) == 5:
+            next_inter_line = inter[i+1].split(' ')
             if parts[3] == "+":
                 #left_side = parts[0]
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-
-                '''if first_operand.isnumeric(): 
-                    memory_address = first_operand
-                else:
-                    memory_address = getBracketsContent(first_operand)
-
-                if second_operand.isnumeric(): 
-                    memory_address2 = second_operand
-                else:
-                    memory_address2 = getBracketsContent(second_operand)
-
-                regi1 = REGISTERS.pop()
-                regi2 = REGISTERS.pop()
-                arm_code += "\tldr " + regi1 + ", [sp, #" + memory_address + "]\n"
-                arm_code += "\tldr " + regi2 + ", [sp, #" + memory_address2 + "]\n"
-
-                arm_code += "\tadd " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
-                
-                #!handle temporals like m#[#] = t#
-                if memory_address > memory_address2:
-                    arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address) + 4) + "]\n"
-                else:
-                    arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address2) + 4) + "]\n"
-
-                #?if last function
-                    #arm_code += "\tmov " + regi1 + " " +  str(function_alocated_space-4) + "\n"
-
-                REGISTERS.append(regi2)
-                REGISTERS.append(regi1)'''
-
-                last_line = inter[line_cnt-1]
+                last_line = inter[i-1]
                 arm_code += operationsFunction(first_operand,second_operand,'add',last_line)
             
             elif parts[3] == "-":
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-                last_line = inter[line_cnt-1]
+                last_line = inter[i-1]
                 arm_code += operationsFunction(first_operand,second_operand,'sub',last_line)
 
             elif parts[3] == "*":
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-                last_line = inter[line_cnt-1]
+                last_line = inter[i-1]
                 arm_code += operationsFunction(first_operand,second_operand,'mul',last_line)
 
-            elif parts[3] == "<":
-                continue
-
-            elif parts[3] == ">":
-                continue
+            # IfZ
+            # checkk if next line is an if expression
+            elif next_inter_line[0] == 'IfZ':
+                first_operand = parts[2]
+                second_operand = parts[4]
+                if parts[3] == "<":
+                    arm_code += comparisonsFunction(first_operand,second_operand,'==',inter,i)
+                elif parts[3] == ">":
+                    arm_code += comparisonsFunction(first_operand,second_operand,'==',inter,i)
+                elif parts[3] == "==": 
+                    arm_code += comparisonsFunction(first_operand,second_operand,'==',inter,i)
+                    
+                i = i + 2
 
         arm_code_all += arm_code
-        line_cnt += 1
         armct = arm_code.replace("\t","")
-        armc.append(armct.split("\n")[0])
+        list_temp = armct.split("\n")
+        for codeline in list_temp:
+            if len(codeline) > 0:
+                armc.append(codeline)
+        i += 1
 
     return arm_code_all
 

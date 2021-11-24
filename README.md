@@ -19,5 +19,16 @@ Proyecto 3 compiladores
 
     - LEARN MASM ASSEMBLY - https://www.tutorialspoint.com/assembly_programming/index.htm
 
+
+## PRUEBAS
+ - QUICKSORT, FACTORIAL, FIBONACCI Y ACKERMAN
+
 ## UI Ideas
  - https://www.w3schools.com/code/tryit.asp?filename=G68VMFWS12UH
+
+## todos
+ - if 
+    - else 
+ - while 
+ - arrays
+ - functionCalls

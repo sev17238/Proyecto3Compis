@@ -1,9 +1,10 @@
 class Program{
     void main(){
         int a;
-        while(a == 1){
-            a = a + 1;
+        int b;
+        a = 10;
+        if (a == 5){
+            b = 3;
         }
     }
-
 }

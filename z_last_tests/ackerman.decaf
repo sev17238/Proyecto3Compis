@@ -1,0 +1,28 @@
+class Program {
+
+    void OutputInt(int n, int h)
+    {
+    }
+
+    int ackerman(int m, int n) {
+        if (m == 0) {
+            return n + 1;
+        }
+        if (n == 0) {
+            return ackerman(m-1, 1);
+        } else {
+            int j;
+            j = ackerman(m, n-1);
+            return ackerman(m-1, j);
+        }
+        
+    }
+
+    void main() {
+        int h;
+        int l;
+        h = ackerman(3, 3);
+        l = 44;
+        OutputInt(h, l);
+    }
+}

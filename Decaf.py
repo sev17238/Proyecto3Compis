@@ -20,7 +20,7 @@ import arm
 import sys
 
 
-program = open('z_int_code_tests/test_mid_code1.decaf', 'r+')
+program = open('z_int_code_tests/all.decaf', 'r+')
 #program = open('z_semantic_tests/quicksort.decaf', 'r+')
 #program = open('z_os_tests/if.decaf', 'r+')
 
