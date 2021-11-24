@@ -21,7 +21,7 @@ import sys
 
 
 program = open('z_int_code_tests/all.decaf', 'r+')
-#program = open('z_semantic_tests/quicksort.decaf', 'r+')
+#program = open('z_last_tests/quicksort.decaf', 'r+')
 #program = open('z_os_tests/if.decaf', 'r+')
 
 text = program.read()

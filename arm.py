@@ -85,7 +85,7 @@ def comparisonsFunction(first_operand,second_operand,operation,inter,i):
     regi1 = REGISTERS.pop()
 
     arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
-    arm_code += "\tcmp " + regi1 + ", [sp, #" + str(memory_address2) + "]\n"
+    arm_code += "\tcmp " + regi1 + ", #" + str(memory_address2) + "\n"
 
     # actual_line [t0,=,m1[0],==,5]
     # next_line [IfZ,t0,Goto,L0]
@@ -185,7 +185,12 @@ def read_lines(inter):
         # para funciones, etiquetas, etc
         if len(parts) == 1:
             if re.search("^L.*[0-9]:$", parts[0]): #se verifica partron L#:
-                arm_code += ".LBB0_" + parts[0][1] + "\n"
+                arm_code += ".LBB0_" + parts[0][1] + ":\n"
+            elif parts[0] == 'L_END_IF':
+                arm_code += "\tb ." + parts[0] + '\n'   #     b .L_END_IF
+                arm_code += "." + parts[0] + ':\n'      #.L_END_IF:
+            elif parts[0] == 'L_END_WHILE':
+                arm_code += "." + parts[0] + ':\n'
             else:
                 arm_code += parts[0] + '\n'
         elif len(parts) == 2:
@@ -196,7 +201,12 @@ def read_lines(inter):
                 arm_code += "\tbx lr\n"
             # Goto L#
             if parts[0] == "Goto":
-               continue
+                if parts[1] == 'L_END_IF':
+                    arm_code += '\tb .'+parts[1] + '\n'
+                elif parts[1] == 'L_END_WHILE':
+                    arm_code += '\tb .'+parts[1] + '\n'
+                else:
+                    arm_code += '\tb .LBB0_' + parts[1][1] + '\n'
         elif len(parts) == 3:
             # func begin #
             if parts[0] == "func" and parts[1] == 'begin':

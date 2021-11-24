@@ -127,6 +127,44 @@ class Inter(DecafVisitor):
         self.scope_actual.pop()
         return 0
 
+    ''' #? for only number labels
+    def visitIfScope(self, ctx):
+        self.scope_ids += 1
+        name = "if" + str(self.scope_ids)
+        self.scope_actual.append(name)
+        register = self.visit(ctx.expression())
+        first_label = str(self.label)
+        salto = "L" + first_label
+        self.label += 1
+        if_line = "IfZ " + register + " Goto " + salto + "\n"
+        if register in self.og_registers:
+            self.registers.append(register)
+        self.line += if_line
+        second_label = str(self.label)
+        self.line += "Goto " + "L" + second_label + "\n"
+        self.line += salto + ":\n"
+        self.visit(ctx.block1)
+        end = ""
+        
+        if ctx.block2:
+            #end_line = salto + ": \n"
+            self.label += 1
+            third_label = str(self.label)
+            end = "L"+ third_label
+            self.line += "Goto " + end + "\n"
+            elsee = "L" + second_label
+            self.line += elsee + ":\n"
+            self.visit(ctx.block2)
+            self.label += 1
+        else:
+            end_line = "L" + second_label + ":\n"
+            self.line += end_line
+        if len(end) > 0:
+            self.line += end + ":\n"
+        self.scope_actual.pop()
+        return 0
+    '''
+
     def visitExpr_arith_op(self, ctx):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
