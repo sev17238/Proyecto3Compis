@@ -83,14 +83,14 @@ class Inter(DecafVisitor):
         register = self.visit(ctx.expression())
         true_label = "L" + str(self.label)
         self.label += 1
-        while_cont1 = "IfZ " + register + " Goto " + true_label +" \n"
+        while_cont1 = "IfW " + register + " Goto " + true_label +"\n"
         if register in self.og_registers:
             self.registers.append(register)
         self.line += while_cont1
         self.line += "Goto " + "L_END_WHILE" + "\n"
         self.line += true_label + ":\n"
         self.visit(ctx.block())
-        while_loop = "Goto " + start_label + " \n"
+        while_loop = "Goto " + start_label + "\n"
         self.line += while_loop
         self.line += "L_END_WHILE" + "\n"
         self.scope_actual.pop()

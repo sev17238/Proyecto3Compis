@@ -101,7 +101,50 @@ MEMORY_FUNCTION_CONV = {
     60: -64 ,
 }
 
-def comparisonsFunction(first_operand,second_operand,operation,inter,i):
+def whileStatementArmHandler(first_operand,second_operand,operation,inter,i):
+    actual_line = inter[i].split(' ')
+    next_line = inter[i+1].split(' ')
+    next_next_line = inter[i+2].split(' ')
+
+    arm_code = ''
+    first_ = actual_line[2]
+
+    if first_operand.isnumeric(): 
+        memory_address = first_operand
+    elif re.search("^t.*[0-9]$", first_operand): #check if has pattern for t0 - t9:
+        memory_address1 = getBracketsContent(first_)
+        memory_address = memory_address1 + 4
+    else:
+        memory_address = getBracketsContent(first_operand)
+
+    if second_operand.isnumeric(): 
+        memory_address2 = second_operand
+    elif re.search("^t.*[0-9]$", second_operand): #check if has pattern for t0 - t9:
+        memory_address1 = getBracketsContent(first_)
+        memory_address2 = memory_address1 + 4
+    else:
+        memory_address2 = getBracketsContent(second_operand)
+
+    regi1 = REGISTERS.pop()
+
+    arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
+    arm_code += "\tcmp " + regi1 + ", #" + str(memory_address2) + "\n"
+
+    # actual_line [t0,=,m1[0],==,5]
+    # next_line [IfW,t0,Goto,L0]
+    if  operation == '==': arm_code += "\tbne .LBB0_" + next_line[3][1] + "\n"
+    elif operation == '>': arm_code += "\tblt .LBB0_" + next_line[3][1] + "\n"
+    elif operation == '<': arm_code += "\tbgt .LBB0_" + next_line[3][1] + "\n"
+
+    # !this one is handled in len(line) == 2 with if labels too
+    # next_next_line ["Goto", "L_END_WHILE"]    
+    # arm_code += "\tb ." + next_next_line[1]+ "\n" 
+
+    REGISTERS.append(regi1)
+
+    return arm_code
+
+def ifStatementArmHandler(first_operand,second_operand,operation,inter,i):
     last_line = inter[i-1].split(' ')
     next_line = inter[i+1].split(' ')
     next_next_line = inter[i+2].split(' ')
@@ -147,8 +190,11 @@ def comparisonsFunction(first_operand,second_operand,operation,inter,i):
 def operationsFunction(first_operand,second_operand,operation,last_linee):
     arm_code = ''
     last_line = last_linee.split(' ')
-    first_ = last_line[2]
-    second_ = last_line[4]
+    prev_temp = False
+    if 'func' not in last_line and len(last_line)>1: 
+        first_ = last_line[2]
+        second_ = last_line[4]
+        prev_temp = True
 
     if first_operand.isnumeric(): 
         memory_address = first_operand
@@ -184,7 +230,7 @@ def operationsFunction(first_operand,second_operand,operation,last_linee):
     elif operation == 'mul': arm_code += "\tmul " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
 
     #!handle temporals like m#[#] = t#
-    if memory_address > memory_address2:
+    if int(memory_address) > int(memory_address2):
         arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address) + 4) + "]\n"
     else:
         arm_code += "\tstr " + regi1 + ", [sp, #" + str(int(memory_address2) + 4) + "]\n"
@@ -228,12 +274,18 @@ def read_lines(inter):
         # para funciones, etiquetas, etc
         if len(parts) == 1:
             if re.search("^L.*[0-9]:$", parts[0]): #se verifica partron L#:
-                arm_code += ".LBB0_" + parts[0][1] + ":\n"
+                check_while = inter[i+3].split(' ')
+                if 'L_END_WHILE' in check_while:
+                    arm_code += "\tb .LBB0_" + parts[0][1] + "\n"
+                    arm_code += ".LBB0_" + parts[0][1] + ":\n"
+                else:
+                    arm_code += ".LBB0_" + parts[0][1] + ":\n"
             elif parts[0] == 'L_END_IF':
                 arm_code += "\tb ." + parts[0] + '\n'   #     b .L_END_IF
                 arm_code += "." + parts[0] + ':\n'      #.L_END_IF:
             elif parts[0] == 'L_END_WHILE':
-                arm_code += "." + parts[0] + ':\n'
+                #arm_code += "\tb ." + parts[0] + '\n'   #     b .L_END_WHILE
+                arm_code += "." + parts[0] + ':\n'      #.L_END_WHILE:
             else:
                 arm_code += parts[0] + '\n'
         elif len(parts) == 2:
@@ -272,6 +324,7 @@ def read_lines(inter):
             # m#[#] = t#
             elif parts[0] != "func" and re.search("^t.*[0-9]$", parts[2]): #check if hast pattern for t0 - t9
                 # !this is handled in if len(parts) == 5:
+                i += 1
                 continue
             
             # push param m#[#]
@@ -312,18 +365,32 @@ def read_lines(inter):
                 arm_code += operationsFunction(first_operand,second_operand,'mul',last_line)
 
             # IfZ
-            # checkk if next line is an if expression
+            # check if next line is an if expression
             elif next_inter_line[0] == 'IfZ':
                 first_operand = parts[2]
                 second_operand = parts[4]
-                if parts[3] == "<":
-                    arm_code += comparisonsFunction(first_operand,second_operand,'==',inter,i)
-                elif parts[3] == ">":
-                    arm_code += comparisonsFunction(first_operand,second_operand,'==',inter,i)
+                if parts[3] == "<" or parts[3] == "<=":
+                    arm_code += ifStatementArmHandler(first_operand,second_operand,'<',inter,i)
+                elif parts[3] == ">" or parts[3] == ">=":
+                    arm_code += ifStatementArmHandler(first_operand,second_operand,'>',inter,i)
                 elif parts[3] == "==": 
-                    arm_code += comparisonsFunction(first_operand,second_operand,'==',inter,i)
+                    arm_code += ifStatementArmHandler(first_operand,second_operand,'==',inter,i)
                     
                 i = i + 2
+            
+            # IfW
+            # check if next line is a while expression
+            elif next_inter_line[0] == 'IfW':
+                first_operand = parts[2]
+                second_operand = parts[4]
+                if parts[3] == "<" or parts[3] == "<=":
+                    arm_code += whileStatementArmHandler(first_operand,second_operand,'<',inter,i)
+                elif parts[3] == ">" or parts[3] == ">=":
+                    arm_code += whileStatementArmHandler(first_operand,second_operand,'>',inter,i)
+                elif parts[3] == "==": 
+                    arm_code += whileStatementArmHandler(first_operand,second_operand,'==',inter,i)
+                    
+                i = i + 1
 
         arm_code_all += arm_code
         armct = arm_code.replace("\t","")

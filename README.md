@@ -27,8 +27,8 @@ Proyecto 3 compiladores
  - https://www.w3schools.com/code/tryit.asp?filename=G68VMFWS12UH
 
 ## todos
- - if 
-    - else 
- - while 
- - arrays
- - functionCalls
+ - if       LISTO
+    - else  LISTO
+ - while  
+ - arrays 
+ - functionCalls 
