@@ -48,8 +48,9 @@ class Descriptor():
 
     def removeDRegister(self,register_name,variable):
         actual_reg = self.d_registros[register_name]
-        if 
-        self.d_registros[register_name] = actual_reg
+        if variable in actual_reg:
+            actual_reg.remove(variable)
+            self.d_registros[register_name] = actual_reg
     
     def actualizarDescriptorDeAccesos():
         return 0

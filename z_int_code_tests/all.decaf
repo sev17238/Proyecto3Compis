@@ -3,7 +3,7 @@ class Program{
         int a;
         int b;
         a = 10;
-        if (a == 5){
+        if(a == 5){
             b = 3;
         }else{
             b = 4;
