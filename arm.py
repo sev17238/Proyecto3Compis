@@ -284,7 +284,6 @@ def read_lines(inter):
                 arm_code += "\tb ." + parts[0] + '\n'   #     b .L_END_IF
                 arm_code += "." + parts[0] + ':\n'      #.L_END_IF:
             elif parts[0] == 'L_END_WHILE':
-                #arm_code += "\tb ." + parts[0] + '\n'   #     b .L_END_WHILE
                 arm_code += "." + parts[0] + ':\n'      #.L_END_WHILE:
             else:
                 arm_code += parts[0] + '\n'
