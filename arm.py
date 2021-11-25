@@ -17,6 +17,48 @@ import re
 # .section .text
 # .global _start
 
+class Descriptor():
+    def __init__(self):
+        # variables que pueden contener los registros
+        self.d_registros = {
+            'R0':  [],
+            'R1':  [],
+            'R2':  [],
+            'R3':  [],
+            'R4':  [],
+            'R5':  [],
+            'R6':  [],
+            'R7':  [],
+            'R8':  [],
+            'R9':  [],
+            'R10': [],
+        }
+
+        #registros, direcciones de memoria, ubicacion de pila
+        self.d_accesos = {
+            #'t0':  ['R0','R1'],
+            #'m1[0]':  ['R1'],
+        }
+
+    def addDRegister(self,register_name,variables_array):
+        actual_reg = self.d_registros[register_name]
+        for v in variables_array:
+            actual_reg.append(v)
+        self.d_registros[register_name] = actual_reg
+
+    def removeDRegister(self,register_name,variable):
+        actual_reg = self.d_registros[register_name]
+        if 
+        self.d_registros[register_name] = actual_reg
+    
+    def actualizarDescriptorDeAccesos():
+        return 0
+
+    def actualizarDescriptorDeRegistros():
+        return 0
+
+    
+
 class register():
     def __init__(self, name):
         self.name = name
