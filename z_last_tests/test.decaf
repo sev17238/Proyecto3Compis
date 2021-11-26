@@ -1,0 +1,33 @@
+class Program{
+    int func(){
+        int x;
+        x = 1;
+        return x;
+    }
+
+    void main(){
+        int a;
+        int b;
+        int c;
+        int h;
+
+        a = 1;
+        b = 2;
+
+        c = a + b;
+        
+        if(a == 1){
+            a = 3;
+        }else{
+            a = 5;
+        }
+
+        h = 10;
+
+        while(h == 10){
+            h = h + 1;
+        }
+    }
+}
+
+    

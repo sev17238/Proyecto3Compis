@@ -20,9 +20,13 @@ import arm
 import sys
 
 
-program = open('z_int_code_tests/all.decaf', 'r+')
+#program = open('z_int_code_tests/all.decaf', 'r+')
+program = open('z_last_tests/test.decaf', 'r+')
 #program = open('z_last_tests/quicksort.decaf', 'r+')
-#program = open('z_os_tests/if.decaf', 'r+')
+#program = open('z_last_tests/ackerman.decaf', 'r+')
+#program = open('z_last_tests/fibonacci.decaf', 'r+')
+#program = open('z_last_tests/factorial.decaf', 'r+')
+
 
 text = program.read()
 program.close()

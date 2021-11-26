@@ -51,7 +51,72 @@ class Descriptor():
         if variable in actual_reg:
             actual_reg.remove(variable)
             self.d_registros[register_name] = actual_reg
-    
+        
+    def addDAccess(self,variable,registers_array):
+        self.d_accesos[variable] = []
+        actual_regs_in_var = []
+        for v in registers_array:
+            actual_regs_in_var.append(v)
+        self.d_accesos[variable] = actual_regs_in_var
+
+    def removeDAccess(self,variable,register_name):
+        actual_regs_in_var = self.d_accesos[variable]
+        if variable in actual_regs_in_var:
+            actual_regs_in_var.remove(variable)
+            self.d_registros[register_name] = actual_regs_in_var
+
+    # recibe de entrada una expresion aritmetica de codigo intermedio
+    def getReg(self,inter_expression):
+        x = inter_expression[0] #t0
+        y = inter_expression[2] #m1[0]
+        z = inter_expression[3] #m2[1]
+        registers_to_use = []
+        
+        
+        #1 Para la instrucción LD R, x
+        for i in REGISTERS:
+            if x in REGISTERS[i]:
+                pass
+            else:
+                registers_to_use.append(x)
+            if y in REGISTERS[i]:
+                pass
+            else:
+                registers_to_use.append(y)
+            if z in REGISTERS[i]:
+                pass
+            else:
+                registers_to_use.append(z)
+
+        first_operand = ''
+        second_operand = ''
+        #2 Para la instrucción ST x, R
+        if first_operand.isnumeric(): 
+            memory_address = first_operand
+        elif re.search("^t.*[0-9]$", first_operand): #check if has pattern for t0 - t9:
+            memory_address1 = getBracketsContent('fp[0]')
+            memory_address = memory_address1 + 4
+        else:
+            memory_address = getBracketsContent(first_operand)
+
+        if second_operand.isnumeric(): 
+            memory_address2 = second_operand
+        elif re.search("^t.*[0-9]$", second_operand): #check if has pattern for t0 - t9:
+            memory_address1 = getBracketsContent('fp[0]')
+            memory_address2 = memory_address1 + 4
+        else:
+            memory_address2 = getBracketsContent(second_operand)
+
+        #3 Para una operación como ADD R x , Ry , R z , implementar una instrucción de tres direcciones x = y + z
+
+
+        #4 Al procesar una instrucción de copia x = y,
+
+
+        
+        return registers_to_use
+
+
     def actualizarDescriptorDeAccesos():
         return 0
 
@@ -101,6 +166,9 @@ MEMORY_FUNCTION_CONV = {
     60: -64 ,
 }
 
+des = Descriptor()
+
+
 def whileStatementArmHandler(first_operand,second_operand,operation,inter,i):
     actual_line = inter[i].split(' ')
     next_line = inter[i+1].split(' ')
@@ -127,6 +195,9 @@ def whileStatementArmHandler(first_operand,second_operand,operation,inter,i):
 
     regi1 = REGISTERS.pop()
 
+    #des.addDRegister(regi1,[actual_line[0]])
+    #des.addDAccess(actual_line[0],[regi1])
+
     arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
     arm_code += "\tcmp " + regi1 + ", #" + str(memory_address2) + "\n"
 
@@ -148,6 +219,7 @@ def ifStatementArmHandler(first_operand,second_operand,operation,inter,i):
     last_line = inter[i-1].split(' ')
     next_line = inter[i+1].split(' ')
     next_next_line = inter[i+2].split(' ')
+    actual_line = inter[i].split(' ')
 
     arm_code = ''
     first_ = last_line[2]
@@ -170,6 +242,9 @@ def ifStatementArmHandler(first_operand,second_operand,operation,inter,i):
 
     regi1 = REGISTERS.pop()
 
+    #des.addDRegister(regi1,[actual_line[0]])
+    #des.addDAccess(actual_line[0],[regi1])
+
     arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
     arm_code += "\tcmp " + regi1 + ", #" + str(memory_address2) + "\n"
 
@@ -187,11 +262,13 @@ def ifStatementArmHandler(first_operand,second_operand,operation,inter,i):
     return arm_code
 
 
-def operationsFunction(first_operand,second_operand,operation,last_linee):
+def operationsFunction(first_operand,second_operand,operation,inter,i):
     arm_code = ''
-    last_line = last_linee.split(' ')
+    last_line = inter[i-1].split(' ')
+    actual_line = inter[i].split(' ')
     prev_temp = False
-    if 'func' not in last_line and len(last_line)>1: 
+    if 'func' not in last_line and '_MCall' not in last_line and len(last_line)!=1 and len(last_line)!=3: 
+        #print(' '.join(last_line))
         first_ = last_line[2]
         second_ = last_line[4]
         prev_temp = True
@@ -222,8 +299,23 @@ def operationsFunction(first_operand,second_operand,operation,last_linee):
 
     regi1 = REGISTERS.pop()
     regi2 = REGISTERS.pop()
+
+
     arm_code += "\tldr " + regi1 + ", [sp, #" + str(memory_address) + "]\n"
     arm_code += "\tldr " + regi2 + ", [sp, #" + str(memory_address2) + "]\n"
+
+#
+    #des.addDRegister(regi1,[actual_line[2],actual_line[4]])
+    #des.addDRegister(regi2,[actual_line[2],actual_line[4]])
+    #
+    #des.addDRegister(regi1,[memory_address])
+    #des.addDRegister(regi2,[memory_address2])
+#
+    #des.addDAccess(actual_line[0],[regi1])
+    #des.addDAccess(actual_line[0],[regi2])
+    #des.addDAccess(memory_address,[regi1])
+    #des.addDAccess(memory_address2,[regi2])
+#
 
     if operation == 'add': arm_code += "\tadd " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
     elif operation == 'sub': arm_code += "\tsub " + regi1 + ", " + regi1 + ", " + regi2 + "\n"
@@ -240,6 +332,9 @@ def operationsFunction(first_operand,second_operand,operation,last_linee):
 
     REGISTERS.append(regi2)
     REGISTERS.append(regi1)
+
+    #print(des.d_accesos)
+    #print(des.d_registros)
 
     return arm_code
 
@@ -328,15 +423,18 @@ def read_lines(inter):
             
             # push param m#[#]
             elif parts[0] == 'push':
+                i += 1
                 continue
 
             # m#[#] = m#[#]
             else:
+                i += 1
                 continue
             
         elif len(parts) == 4:
             # para llamada a metodos
             if parts[2] == '_MCall':
+                i += 1
                 continue
 
         elif len(parts) == 5:
@@ -346,22 +444,19 @@ def read_lines(inter):
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-                last_line = inter[i-1]
-                arm_code += operationsFunction(first_operand,second_operand,'add',last_line)
+                arm_code += operationsFunction(first_operand,second_operand,'add',inter,i)
             
             elif parts[3] == "-":
                 first_operand = parts[2]
                 second_operand = parts[4]
-
-                last_line = inter[i-1]
-                arm_code += operationsFunction(first_operand,second_operand,'sub',last_line)
+                
+                arm_code += operationsFunction(first_operand,second_operand,'sub',inter,i)
 
             elif parts[3] == "*":
                 first_operand = parts[2]
                 second_operand = parts[4]
 
-                last_line = inter[i-1]
-                arm_code += operationsFunction(first_operand,second_operand,'mul',last_line)
+                arm_code += operationsFunction(first_operand,second_operand,'mul',inter,i)
 
             # IfZ
             # check if next line is an if expression
@@ -421,26 +516,7 @@ def data2(scopes):
         #arm_code += scope.name[0] + str(scope.id) + " TIMES " + str(int(scope.get_size()/4)) + " DB 0\n"
     return arm_code
 
-def getReg(inter_expression):
-    x = inter_expression[0]
-    y = inter_expression[2]
-    z = inter_expression[3]
-    registers_to_use = []
-    for i in REGISTERS:
-        if x in REGISTERS[i]:
-            pass
-        else:
-            registers_to_use.append(x)
-        if y in REGISTERS[i]:
-            pass
-        else:
-            registers_to_use.append(y)
-        if z in REGISTERS[i]:
-            pass
-        else:
-            registers_to_use.append(z)
-    
-    return registers_to_use
+
 
 
 

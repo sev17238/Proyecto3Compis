@@ -29,6 +29,6 @@ Proyecto 3 compiladores
 ## todos
  - if       LISTO
     - else  LISTO
- - while  
+ - while    LISTO
  - arrays 
  - functionCalls 
