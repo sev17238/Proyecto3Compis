@@ -25,10 +25,3 @@ Proyecto 3 compiladores
 
 ## UI Ideas
  - https://www.w3schools.com/code/tryit.asp?filename=G68VMFWS12UH
-
-## todos
- - if       LISTO
-    - else  LISTO
- - while    LISTO
- - arrays 
- - functionCalls 

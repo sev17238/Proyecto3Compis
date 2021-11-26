@@ -3,30 +3,17 @@ class Program {
     {
     }
 
-    void fib(int n) {
-        int a;
-        int b;
-        int c;
-        int count;
-
-        a = 0;
-        b = 1;
-        c = 0;
-        count = 0;
-        
-        while (count < n) {
-            OutputInt(a);
-            c = a + b;
-            a = b;
-            b = c;
-            count = count + 1;
-        }
-    
+    int f(int n)
+    {
+        if (n==0) {return 1;}
+        if (n==1) {return 1;}
+        return f(n-1) + f(n-2);
     }
+
 
     void main() {
         int n;
         n = 7;
-        fib(n);
+        f(n);
     }
 }
